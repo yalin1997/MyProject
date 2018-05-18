@@ -143,7 +143,7 @@ namespace neuroskyApp
                     {
                       DateTime time = DateTime.Now;
                       float tempData=NativeThinkgear.TG_GetValue(ConnectionID, NativeThinkgear.DataType.TG_DATA_RAW);
-                       
+                        label1.Text = "收到數據 : " + tempData;
                     }
                 }
             });
