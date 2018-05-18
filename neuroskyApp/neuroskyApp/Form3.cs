@@ -10,28 +10,23 @@ using System.Windows.Forms;
 
 namespace neuroskyApp
 {
-    public partial class Form2 : Form
+    public partial class Form3 : Form
     {
-        public Form2()
+        Form1 F1;
+        public Form3( Form1 f1)
         {
             InitializeComponent();
-        }
-
-        private void Form2_Load(object sender, EventArgs e)
-        {
-
+            F1 = f1;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form4 Connect = new Form4(this);
+            //int callNum = 1;
             this.Visible = false;
-            Connect.Visible = true;
+            F1.SetLable ( "修改完成");
+
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
+
     }
 }
