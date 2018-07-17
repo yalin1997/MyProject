@@ -26,7 +26,7 @@ namespace neuroskyApp
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+            //test
             // if (callNum == 1)
             {
                 String comPortName = "\\\\.\\COM3";
