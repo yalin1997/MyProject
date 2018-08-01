@@ -10,25 +10,27 @@ using System.Windows.Forms;
 using libStreamSDK;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Office.Interop.Excel;
 
 namespace neuroskyApp
 {
     public partial class Form1 : Form
     {
+        private const string Path = @"D:\專題\test\WriteText.txt";
         private int errCode;
         private int ConnectionID ;
         public int callNum = 0;
         private List<float> rawList = new List<float>();
+        private List<String> StringList = new List<String>();
         private Boolean ifConnect = false;
         private Boolean startDraw = false;
         private Pen bluePen = new Pen(Color.Blue);
-        private Point p1 ;
-        private Point p2 ;
-        private int iCount = 0;
+        private Form4 Data;
 
-        public Form1()
+        public Form1(Form4 testMsg)
         {
             InitializeComponent();
+            Data = testMsg;
         }
         public Form1(int callNum) {
             this.callNum = callNum;
@@ -41,7 +43,7 @@ namespace neuroskyApp
         private void Form1_Activated(object sender, System.EventArgs e) {
             Visible = true;
         }
-
+        
         private void button1_Click(object sender, EventArgs e)
         {
             if (button1.Text.Equals("Disconnect"))
@@ -60,7 +62,7 @@ namespace neuroskyApp
                     if (MessageBox.Show("您將開始與裝置的連線，確定嗎?", "My Application",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        String comPortName = "\\\\.\\COM4";
+                        String comPortName = "\\\\.\\COM3";
                     ConnectionID = NativeThinkgear.TG_GetNewConnectionId();
                     NativeThinkgear.TG_SetStreamLog(ConnectionID, "myStreamLog.txt");
                     NativeThinkgear.TG_SetDataLog(ConnectionID, "myDataLog.txt");
@@ -75,14 +77,14 @@ namespace neuroskyApp
                         ifConnect = false;
                         startDraw = false;
                         }
-                        else
+                        else if(errCode==0)
                         {
                             label1.Text = ("Connect success!!!");
+                            Console.WriteLine(ConnectionID);
                             button1.Text = ("Disconnect");
                             ifConnect = true;
-                        //AutoGetValue();
 
-                    }
+                         }
                      }
               }
         }
@@ -114,7 +116,7 @@ namespace neuroskyApp
                     }
                     else
                     {
-                        Thread.Sleep(500);
+                       Thread.Sleep(500);
                         g1.Clear(Color.White);
                     }
                 }
@@ -133,7 +135,7 @@ namespace neuroskyApp
 
                     /* Attempt to read a Packet of data from the connection */
                     errCode = NativeThinkgear.TG_ReadPackets(ConnectionID, 1);
-                    Console.WriteLine("TG_ReadPackets returned: " + errCode);
+                    Console.WriteLine("TG_ReadPackets returned: " + errCode+"   "+packetsRead);
                     /* If TG_ReadPackets() was able to read a complete Packet of data... */
                     if (errCode == 1)
                     {
@@ -145,15 +147,16 @@ namespace neuroskyApp
                             float temp = NativeThinkgear.TG_GetValue(ConnectionID, NativeThinkgear.DataType.TG_DATA_RAW);
                             rawList.Add(temp);
                             /* Get and print out the updated attention value */
-                            Console.WriteLine("New RAW value: : " + (int)temp);
-                            label1.Text = "New RAW value: : " + (int)temp;
+                            PrintRaw(temp);
+                            label1.Text = "New RAW value: : " + (int)temp+ DateTime.Now.ToShortDateString()+"/"+DateTime.Now.TimeOfDay;
+                            StringList.Add(label1.Text);
+                            
                         } /* end "If attention value has been updated..." */
 
                     } /* end "If a Packet of data was read..." */
 
                 } /* end "Read 10 Packets of data from connection..." */
                 panel1.Invalidate();
-                //AutoGetValue();
             }
             else
             {
@@ -171,7 +174,7 @@ namespace neuroskyApp
 
         private void button4_Click(object sender, EventArgs e)
         {
-            Form3 testData = new Form3(this);
+            Form3 testData = new Form3(this, Data);
             testData.Visible = true;
  
         }
@@ -187,7 +190,7 @@ namespace neuroskyApp
             int packetsRead = 0;
 
             Task t = Task.Run(() => {
-                while (packetsRead < 2000) // it use as time
+                while (packetsRead < 10) // it use as time
                 {
                     /* If raw value has been updated ... */
                     if (NativeThinkgear.TG_GetValueStatus(ConnectionID, NativeThinkgear.DataType.TG_DATA_RAW) != 0)
@@ -219,10 +222,16 @@ namespace neuroskyApp
         {
             Console.WriteLine("new RAW Value"+(int)TEMP);
         }
-
         private void label1_Click(object sender, EventArgs e)
         {
            
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            System.IO.File.WriteAllText(Path, Data.getString());
+            System.Windows.Forms.Application.Exit();
+            
         }
     }
 }

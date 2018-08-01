@@ -25,13 +25,19 @@ namespace neuroskyApp
         private void button1_Click(object sender, EventArgs e)
         {
             Form4 Connect = new Form4(this);
+            Connect.Show(this);
             this.Visible = false;
-            Connect.Visible = true;
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Form5 checkData = new Form5();
+            checkData.Show(this);
         }
     }
 }
