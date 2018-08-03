@@ -17,6 +17,7 @@ namespace neuroskyApp
     public partial class Form1 : Form
     {
         private const string Path = @"D:\專題\test\WriteText.txt";
+        private const string Path2 = @"D:\專題\test\";
         private int errCode;
         private int ConnectionID ;
         public int callNum = 0;
@@ -62,10 +63,12 @@ namespace neuroskyApp
                     if (MessageBox.Show("您將開始與裝置的連線，確定嗎?", "My Application",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk) == DialogResult.OK)
                     {
-                        String comPortName = "\\\\.\\COM3";
+                        String comPortName = "\\\\.\\COM4";
                     ConnectionID = NativeThinkgear.TG_GetNewConnectionId();
-                    NativeThinkgear.TG_SetStreamLog(ConnectionID, "myStreamLog.txt");
-                    NativeThinkgear.TG_SetDataLog(ConnectionID, "myDataLog.txt");
+                    int tem1=NativeThinkgear.TG_SetStreamLog(ConnectionID, "myStreamLog.txt");
+                    int tem2 = NativeThinkgear.TG_SetDataLog(ConnectionID, "myDataLog.txt");
+                    Console.WriteLine(tem1);
+                    Console.WriteLine(tem2);
                     errCode = NativeThinkgear.TG_Connect(ConnectionID,
                                       comPortName,
                                       NativeThinkgear.Baudrate.TG_BAUD_57600,
@@ -95,9 +98,10 @@ namespace neuroskyApp
             int x2 = 320;
             Graphics g1 = panel1.CreateGraphics();
 
-            if(startDraw == true)
+            if(startDraw == true&&comboBox1.Text=="RawData")
             {
-                for(int j = 0; j < rawList.Count() - 249; j++)
+                int counter = rawList.Count <= 249 ? 1: rawList.Count() - 249;
+                for (int j = 0; j < counter; j++)
                 {
                     g1.DrawLine(bluePen, 50, x1, 50, x2);
                     g1.DrawLine(bluePen, 50, x2 / 2, 500, x2 / 2);
@@ -116,7 +120,7 @@ namespace neuroskyApp
                     }
                     else
                     {
-                       Thread.Sleep(500);
+                       
                         g1.Clear(Color.White);
                     }
                 }
@@ -127,7 +131,7 @@ namespace neuroskyApp
         private void button2_Click(object sender, EventArgs e)
         {
             startDraw = true;
-            if (ifConnect == true)
+            if (ifConnect == true&&comboBox1.Text!="")
             {
                 int packetsRead = 0;
                 while (packetsRead < 2000)
@@ -150,7 +154,7 @@ namespace neuroskyApp
                             PrintRaw(temp);
                             label1.Text = "New RAW value: : " + (int)temp+ DateTime.Now.ToShortDateString()+"/"+DateTime.Now.TimeOfDay;
                             StringList.Add(label1.Text);
-                            
+                            Thread.Sleep(500);
                         } /* end "If attention value has been updated..." */
 
                     } /* end "If a Packet of data was read..." */
@@ -190,7 +194,7 @@ namespace neuroskyApp
             int packetsRead = 0;
 
             Task t = Task.Run(() => {
-                while (packetsRead < 10) // it use as time
+                while (packetsRead < 20000) // it use as time
                 {
                     /* If raw value has been updated ... */
                     if (NativeThinkgear.TG_GetValueStatus(ConnectionID, NativeThinkgear.DataType.TG_DATA_RAW) != 0)
@@ -230,6 +234,10 @@ namespace neuroskyApp
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             System.IO.File.WriteAllText(Path, Data.getString());
+            for(int x=0;x< StringList.Count; x++)
+            {
+                System.IO.File.WriteAllText(Path2+Data.getName()+".txt", StringList[x]);
+            }
             System.Windows.Forms.Application.Exit();
             
         }

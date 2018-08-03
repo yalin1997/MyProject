@@ -73,6 +73,10 @@ namespace neuroskyApp
         {
             Name = nawName;
         }
+        public String getName()
+        {
+            return Name;
+        }
         public void changGeder(String nawSex)
         {
             Sex = nawSex;
